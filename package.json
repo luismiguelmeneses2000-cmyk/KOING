@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "description": "KOING — PWA de finanzas personales",
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.8.0"
+    "mongodb": "^6.8.0",
+    "nodemailer": "^6.9.14"
   }
 }
