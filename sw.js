@@ -1,5 +1,5 @@
 // Service worker de KOING: la app abre sin internet y muestra lo último que viste
-const VERSION = 'koing-v3';
+const VERSION = 'koing-v4';
 const SHELL = ['/', '/index.html', '/css/app.css', '/js/app.js', '/js/api.js', '/js/calc.js', '/js/pig.js', '/js/instalar.js', '/manifest.webmanifest', '/favicon.ico', '/icons/icon-192.png', '/icons/favicon-32.png'];
 
 self.addEventListener('install', (e) => {

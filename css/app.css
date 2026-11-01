@@ -378,3 +378,43 @@ button.row:active, a.row:active { background: var(--soft); }
 .steps { list-style: none; margin: 16px 0 0; padding: 0; border-top: 1px solid var(--line); }
 .steps li { display: flex; align-items: center; gap: 14px; min-height: 60px; border-bottom: 1px solid var(--line); font-size: 16px; padding: 6px 0; }
 .steps .n { width: 40px; height: 40px; flex: none; border-radius: 12px; background: var(--soft); color: var(--brand-strong); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 17px; }
+
+/* ---- Menú de Inicio (menos es más) ---- */
+.menu { list-style: none; margin: 18px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.menu-row { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 14px; width: 100%; min-height: 72px; padding: 12px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+.menu-row:active { background: var(--soft); }
+.menu-row:focus-visible { outline: 3px solid var(--sage); outline-offset: -3px; }
+.menu-row .mi { width: 44px; height: 44px; border-radius: 12px; background: var(--soft); color: var(--brand-strong); display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.menu-row .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.menu-row .t { font-size: 17px; font-weight: 800; }
+.menu-row .s { font-size: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu-row .chev { color: var(--muted); }
+.tasa-mini { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 2px; margin-top: 4px; font-size: 14px; font-weight: 700; color: var(--brand-strong); min-height: 32px; }
+.tasa-mini:focus-visible { outline: 3px solid var(--sage); }
+
+/* ---- Caja de ahorro ---- */
+.caja { display: grid; gap: 6px; }
+.celda { position: relative; min-height: 48px; border: 1.5px solid var(--line-strong); border-radius: 10px; background: var(--surface); font-weight: 800; font-size: 16px; color: var(--text); cursor: pointer; padding: 0; transition: background .2s ease, border-color .2s ease, color .2s ease; }
+.celda:active { transform: scale(.95); }
+.celda span { position: relative; z-index: 1; }
+.celda.tachada { background: var(--soft); border-color: var(--sage); color: var(--muted); }
+.celda.tachada::before, .celda.tachada::after { content: ""; position: absolute; left: 18%; right: 18%; top: 50%; height: 3px; border-radius: 2px; background: var(--brand-strong); z-index: 2; transform-origin: center; }
+.celda.tachada::before { transform: rotate(35deg); }
+.celda.tachada::after { transform: rotate(-35deg); }
+.celda.pop { animation: celdaPop .45s cubic-bezier(.34,1.56,.64,1); }
+.celda.pop::before { animation: tacha .25s ease both; }
+.celda.pop::after { animation: tacha .25s ease .12s both; }
+.celda-in { animation: kBounceIn .35s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes celdaPop { 0% { transform: scale(1) } 40% { transform: scale(1.18) } 100% { transform: scale(1) } }
+@keyframes tacha { from { clip-path: inset(0 100% 0 0) } to { clip-path: inset(0 0 0 0) } }
+.festejo { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; pointer-events: auto; background: rgba(255,255,255,.35); animation: kFade .15s ease both; }
+.festejo.out { animation: kFadeOut .25s ease both; }
+.festejo .confeti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.festejo .confeti i { position: absolute; top: -20px; border-radius: 2px; animation-name: confeti; animation-timing-function: cubic-bezier(.25,.6,.4,1); animation-fill-mode: both; }
+@keyframes confeti { 0% { transform: translate(0, 0) rotate(0); opacity: 1 } 85% { opacity: 1 } 100% { transform: translate(var(--x), 105vh) rotate(var(--r)); opacity: 0 } }
+.festejo-card { position: relative; background: var(--surface); border-radius: 22px; padding: 16px 26px 20px; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 10px 40px rgba(46,52,36,.25); animation: kBounceIn .45s cubic-bezier(.34,1.56,.64,1) both; text-align: center; max-width: 300px; }
+.festejo-card b { font-size: 24px; font-weight: 800; color: var(--brand-strong); }
+.festejo-card span { font-size: 15px; color: var(--muted); font-weight: 700; }
+.festejo-pig { animation: pigFeliz .6s cubic-bezier(.3,1.4,.6,1) .1s 2 both; transform-origin: 50% 100%; }
+@keyframes pigFeliz { 0%, 100% { transform: none } 30% { transform: scale(1.08,.9) } 60% { transform: translateY(-18px) scale(.96,1.05) } }
+.festejo.grande .festejo-card b { font-size: 28px; }

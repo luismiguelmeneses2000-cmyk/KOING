@@ -68,7 +68,9 @@ Instrucciones manuales, por si acaso:
 | Presentación | El cerdito entra rebotando y explica la app en 4 pasos. |
 | Crear cuenta / Entrar | Correo y clave. Los datos quedan en tu cuenta (ves lo mismo en cualquier teléfono). |
 | 7 preguntas | Nombre y moneda · cada cuánto cobras · cuánto · deudas · gastos fijos · metas · cuánto apartar. Así la app arranca armada y no tienes que cargar todo a mano. |
-| Inicio | Disponible para gastar en la quincena (o semana/mes), desglose, tu meta #1, próximos pagos y últimos movimientos. |
+| Inicio | Disponible para gastar y un menú corto: Cómo va tu quincena, Próximos pagos, Tu meta y Movimientos. Cada opción abre su detalle. |
+| Caja de ahorro | Reto de $500, $1.000, $1.500 o $5.000: una cuadrícula de números en dólares que suman exacto la meta. Tachas cada número cuando guardas esa cantidad y el cerdito celebra con confeti. |
+| Pagar una deuda | Cuota completa o **abono parcial**: el abono se acumula hasta completar la cuota; si pagas de más, adelanta cuotas. |
 | Botón **+** | Gasto, pago de deuda, ingreso extra, deuda nueva o meta. |
 | Gasto | Si es **A crédito**, crea la deuda sola con sus cuotas. Antes de guardar revisa si el gasto pone en riesgo tu meta #1 o tu presupuesto y te avisa (“Si gastas esto, no podrás comprar…”). |
 | Deudas | Agrupadas por tipo (cuotas, tarjeta, préstamo, otra): cuota, frecuencia, hasta cuándo y cuántas llevas. |
@@ -146,6 +148,7 @@ Son **4 funciones serverless** (Vercel Hobby permite hasta 12). El código compa
 | `metas` | `userId`, `nombre`, `precio`, `apartado`, `tipo` (necesito/quiero), `prioridad`, `completada` |
 | `ventas` | `userId`, `monto`, `moneda` (USD/VES), `tasa`, `descripcion`, `metodo`, `fecha`, `hora` |
 | `proveedores` | `userId`, `empresa`, `concepto`, `monto`, `moneda`, `saldo`, `vence`, `pagado` |
+| `cajas` | `userId`, `meta`, `numeros` (lista), `tachados` (posiciones), `completada` |
 | `tasas` | caché de la tasa BCV (`_id: "bcv"`, `valor`, `actualizado`) |
 
 `movimientos` ahora también guarda `espacio` (personal/negocio), `moneda` y `tasa`. Los datos viejos sin esos campos se toman como personales y en dólares.
@@ -161,7 +164,7 @@ Todas las consultas filtran por `userId` del token, así que nadie ve datos de o
 - **Gastos fijos sugeridos:** `js/app.js`, constante `FIJOS_COMUNES`.
 - **Categorías de gasto:** `js/app.js` (vista `formGasto`) **y** `lib/util.js` (`CATEGORIAS`): deben coincidir.
 - **Reglas de las alertas:** `js/calc.js`, función `revisarGasto`.
-- Después de cambiar archivos de la app, sube el número en `sw.js` (`koing-v3` → `koing-v4`) para que los teléfonos tomen la versión nueva.
+- Después de cambiar archivos de la app, sube el número en `sw.js` (`koing-v4` → `koing-v5`) para que los teléfonos tomen la versión nueva.
 
 ---
 
