@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.koing.android",
+    "sha256_cert_fingerprints": ["2F:AB:22:F4:6B:65:FD:51:A9:AF:2D:FB:82:43:40:FC:D5:0C:B4:BD:F2:5E:7A:7E:5F:40:31:BA:39:67:2F:90"]
+  }
+}]
