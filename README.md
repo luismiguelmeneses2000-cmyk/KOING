@@ -170,3 +170,13 @@ Todas las consultas filtran por `userId` del token, así que nadie ve datos de o
 1. Sube **todo** el contenido del zip a GitHub (arrastra también las carpetas `api`, `css`, `icons`, `js` y `lib`) y reemplaza los archivos.
 2. En Vercel agrega `GMAIL_USER`, `GMAIL_APP_PASSWORD` y `APP_URL` y haz **Redeploy**.
 3. Si ya tenías cuenta: entra a **Ajustes → Emprendimiento o negocio**, elige *Sí, un emprendimiento*, ponle nombre y **Guardar**. Aparece el selector arriba.
+
+---
+
+## App para Android (APK)
+
+Se generó con PWABuilder (paquete `app.koing.android`). El APK abre `https://koing-seven.vercel.app` como app de pantalla completa, así que **cualquier cambio que subas a GitHub/Vercel llega solo a la app**, sin generar otro APK.
+
+- `/.well-known/assetlinks.json` (ya incluido) le demuestra a Android que la app es tuya. Sin ese archivo la app muestra una barra con la dirección arriba.
+- Guarda en un lugar seguro `signing.keystore` y `signing-key-info.txt` (quedaron en tu carpeta Descargas → KOING-APK). Los necesitas para publicar actualizaciones en Google Play. No los subas a GitHub.
+- Si cambias de dominio, hay que generar el APK de nuevo.
