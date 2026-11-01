@@ -21,6 +21,27 @@
   <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
+  <div id="splash" aria-hidden="true">
+    <div class="sp-stage">
+      <svg class="sp-pig" viewBox="0 -70 200 250" role="img" aria-label="KOING">
+        <g class="sp-coin c1"><circle cx="100" cy="-38" r="17" fill="var(--coin)" stroke="var(--pig-line)" stroke-width="7"/></g>
+        <g class="sp-coin c2"><circle cx="100" cy="-38" r="17" fill="var(--coin)" stroke="var(--pig-line)" stroke-width="7"/></g>
+        <g class="sp-coin c3"><circle cx="100" cy="-38" r="17" fill="var(--coin)" stroke="var(--pig-line)" stroke-width="7"/></g>
+        <g class="sp-body">
+          <path class="tail" d="M42 96 C26 96 22 78 34 76 C42 75 42 84 36 85" fill="none" stroke="var(--pig-line)" stroke-width="7" stroke-linecap="round"/>
+          <path d="M60 128 L70 160 L86 160 L92 140 Z M116 140 L124 160 L140 160 L146 126 Z" fill="var(--pig-shade)" stroke="var(--pig-line)" stroke-width="7" stroke-linejoin="round"/>
+          <path d="M128 66 L152 42 L150 78 Z" fill="var(--pig-fill)" stroke="var(--pig-line)" stroke-width="7" stroke-linejoin="round"/>
+          <path d="M150 84 L180 80 L180 114 L150 112 Z" fill="var(--pig-fill)" stroke="var(--pig-line)" stroke-width="7" stroke-linejoin="round"/>
+          <ellipse cx="100" cy="100" rx="62" ry="47" fill="var(--pig-fill)" stroke="var(--pig-line)" stroke-width="7"/>
+          <path d="M66 112 Q100 146 150 116 L150 130 Q100 150 66 124 Z" fill="var(--pig-shade)" opacity=".55"/>
+          <path class="sp-slot" d="M82 70 Q100 63 118 70" fill="none" stroke="var(--pig-line)" stroke-width="7" stroke-linecap="round"/>
+          <ellipse class="eye" cx="140" cy="90" rx="6" ry="6" fill="var(--pig-line)"/>
+        </g>
+      </svg>
+      <div class="sp-sparks"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="sp-word">K<span>O</span>ING</div>
+  </div>
   <div id="app" aria-live="polite"></div>
   <div id="tabbar-root"></div>
   <div id="sheet-root"></div>

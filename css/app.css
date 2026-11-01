@@ -331,3 +331,50 @@ button.row:active, a.row:active { background: var(--soft); }
 .trio > div + div { border-left: 1px solid var(--line); padding-left: 12px; }
 .trio .lbl { font-size: 12px; font-weight: 700; color: var(--muted); }
 .trio .v { font-size: 19px; font-weight: 800; }
+
+/* ===== Pantalla de inicio animada (como el video) ===== */
+#splash { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; overflow: hidden; }
+#splash .sp-stage { position: relative; width: 210px; animation: spIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+#splash .sp-pig { width: 210px; height: 262px; display: block; overflow: visible; transform-origin: 50% 54.8%; }
+#splash .sp-coin { opacity: 0; }
+#splash .c1 { animation: spDrop .45s cubic-bezier(.5,0,.9,.6) .45s both; }
+#splash .c2 { animation: spDrop .45s cubic-bezier(.5,0,.9,.6) .85s both; }
+#splash .c3 { animation: spDrop .45s cubic-bezier(.5,0,.9,.6) 1.25s both; }
+#splash .sp-body { transform-box: fill-box; transform-origin: 50% 100%; animation: spHop .32s ease .88s, spHop .32s ease 1.28s, spShake .5s ease 1.68s; }
+#splash .sp-body .tail { transform-box: fill-box; transform-origin: 100% 50%; animation: kTail .5s ease-in-out 1.6s 2; }
+#splash .sp-sparks i { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--sage); left: 50%; top: 52%; opacity: 0; animation: spSpark .7s ease-out 1.7s both; }
+#splash .sp-sparks i:nth-child(2n) { background: var(--coin); width: 7px; height: 7px; }
+#splash .sp-sparks i:nth-child(1) { --dx: -95px; --dy: -40px; }
+#splash .sp-sparks i:nth-child(2) { --dx: 95px; --dy: -50px; }
+#splash .sp-sparks i:nth-child(3) { --dx: -80px; --dy: 30px; }
+#splash .sp-sparks i:nth-child(4) { --dx: 88px; --dy: 26px; }
+#splash .sp-sparks i:nth-child(5) { --dx: -30px; --dy: -95px; }
+#splash .sp-sparks i:nth-child(6) { --dx: 40px; --dy: -90px; }
+#splash .sp-word { font-family: Nunito, system-ui, sans-serif; font-weight: 800; font-size: 46px; letter-spacing: 2px; color: var(--brand-strong); animation: kRow .45s ease .25s both; }
+#splash .sp-word span { color: #8A9A5B; }
+/* Si los datos tardan, siguen cayendo monedas */
+#splash.sp-wait .c3 { animation: spDrop .45s cubic-bezier(.5,0,.9,.6) 0s infinite; animation-duration: .9s; }
+#splash.sp-wait .sp-body { animation: spHopLoop .9s ease infinite; }
+/* Salida: entramos por la ranura del cerdito hacia la app */
+#splash.sp-out { background: transparent; transition: background .45s ease .2s; pointer-events: none; }
+#splash.sp-out .sp-stage { animation: none; }
+#splash.sp-out .sp-pig { animation: spZoom .75s cubic-bezier(.7,0,.3,1) both; }
+#splash.sp-out .sp-word, #splash.sp-out .sp-sparks { animation: kFadeOut .25s ease both; }
+.app-reveal { animation: spReveal .7s cubic-bezier(.2,.8,.2,1) .25s both; }
+@keyframes spIn { from { opacity: 0; transform: scale(.7) } to { opacity: 1; transform: none } }
+@keyframes spDrop { 0% { opacity: 1; transform: translateY(-40px) } 85% { opacity: 1 } 100% { opacity: 0; transform: translateY(104px) } }
+@keyframes spHop { 0%, 100% { transform: none } 40% { transform: scale(1.07, .9) } 75% { transform: translateY(-8px) scale(.97, 1.04) } }
+@keyframes spHopLoop { 0%, 45%, 100% { transform: none } 55% { transform: scale(1.06, .92) } 75% { transform: translateY(-6px) } }
+@keyframes spShake { 0%, 100% { transform: none } 20% { transform: rotate(-5deg) } 40% { transform: rotate(4deg) } 60% { transform: rotate(-3deg) } 80% { transform: rotate(2deg) } }
+@keyframes spSpark { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.3) } 30% { opacity: 1 } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) } }
+@keyframes spZoom { 0% { transform: none; opacity: 1 } 25% { transform: scale(.92) } 80% { opacity: 1 } 100% { transform: scale(16); opacity: 0 } }
+@keyframes spReveal { from { opacity: 0; transform: scale(1.08) } to { opacity: 1; transform: none } }
+@media (prefers-reduced-motion: reduce) { #splash .sp-coin { display: none; } }
+
+/* ---- Instalar ---- */
+.install-body h1 { margin: 18px 0 6px; font-size: 28px; line-height: 1.2; font-weight: 800; text-align: center; }
+.install-body .lead { margin: 0 0 8px; text-align: center; color: var(--muted); font-size: 16px; }
+.install-actions { display: flex; flex-direction: column; gap: 8px; }
+.steps { list-style: none; margin: 16px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.steps li { display: flex; align-items: center; gap: 14px; min-height: 60px; border-bottom: 1px solid var(--line); font-size: 16px; padding: 6px 0; }
+.steps .n { width: 40px; height: 40px; flex: none; border-radius: 12px; background: var(--soft); color: var(--brand-strong); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 17px; }

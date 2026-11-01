@@ -2,6 +2,7 @@
 import { api, token } from './api.js';
 import { pig, shadow, icon } from './pig.js';
 import * as K from './calc.js';
+import * as INST from './instalar.js';
 
 const { esc } = K;
 const $ = (s, r = document) => r.querySelector(s);
@@ -144,10 +145,11 @@ const upsert = (arr, item) => { const i = arr.findIndex((x) => x.id === item.id)
 async function boot() {
   const resetTok = new URLSearchParams(location.search).get('reset');
   if (resetTok) return renderReset(resetTok);
+  if (INST.necesitaInstalar()) { tabEl.innerHTML = ''; return INST.pantallaInstalar(appEl, () => boot()); }
   if (!token.get()) {
     return store.get('koing_intro') ? renderAuth() : renderIntro();
   }
-  appEl.innerHTML = `<div class="loading">${pig({ size: 110, cls: 'pig-float' })}<span>Abriendo tu KOING…</span></div>`;
+  if (!$('#splash')) appEl.innerHTML = `<div class="loading">${pig({ size: 110, cls: 'pig-float' })}<span>Abriendo tu KOING…</span></div>`;
   try {
     await load();
     if (!S.perfil || !S.perfil.onboarded) return startOnboarding();
@@ -530,7 +532,7 @@ function bigAmount(n, extra = '') {
   const enBs = UI.ver === 'Bs' && t;
   const grande = enBs ? fmtBs(n * t) : fmt(n);
   const chico = t ? (enBs ? '≈ ' + fmt(n) : '≈ ' + fmtBs(n * t)) : '';
-  return `<div class="big num ${n < 0 ? 'neg' : ''}" style="${enBs ? 'font-size:36px' : ''}">${grande}</div>
+  return `<div class="big num ${n < 0 ? 'neg' : ''}" data-count="${enBs ? n * t : n}" data-modo="${enBs ? 'bs' : 'usd'}" style="${enBs ? 'font-size:36px' : ''}">${grande}</div>
     <div style="font-size:15px;color:var(--muted);font-weight:700">${[chico, extra].filter(Boolean).join(' · ')}</div>`;
 }
 // Bloque "en dólares / en bolívares"
@@ -792,7 +794,8 @@ const VIEWS = {
       <div class="field"><label for="aj-neg">Nombre</label><input class="input" id="aj-neg" value="${esc(p.negocioNombre || '')}" maxlength="50" placeholder="Ej: Tortas de Mamá Luisa"></div>
       <div class="err" id="aj-err" role="alert"></div>
       <h2 class="cap">Comparte KOING</h2>
-      <div class="list"><button class="row" data-act="invitar"><span class="main"><span class="t" style="display:block">Invitar a un amigo</span><span class="s">Por WhatsApp o copiando el enlace</span></span><span class="chev">${icon('chev', 18)}</span></button></div>
+      <div class="list">
+        ${!INST.instalada() && (INST.puedeInstalar() || INST.esIOS) ? `<button class="row" data-act="instalarApp"><span class="main"><span class="t" style="display:block">Instalar KOING en este dispositivo</span><span class="s">Se abre como app, sin buscar el link</span></span><span class="chev">${icon('dl', 18)}</span></button>` : ''}<button class="row" data-act="invitar"><span class="main"><span class="t" style="display:block">Invitar a un amigo</span><span class="s">Por WhatsApp o copiando el enlace</span></span><span class="chev">${icon('chev', 18)}</span></button></div>
       <h2 class="cap">Tu cuenta</h2>
       <div class="list">
         <div class="row"><span class="main"><span class="t" style="display:block">${esc(S.user.email)}</span><span class="s">Sesión iniciada</span></span></div>
@@ -1516,7 +1519,7 @@ function sheetRetiro() {
 }
 function sheetInvitar() {
   const url = location.origin;
-  const msg = `Estoy usando KOING para llevar mis cuentas en $ y Bs, mis deudas y lo que quiero comprar. Es gratis, pruébala: ${url}`;
+  const msg = `Estoy usando KOING para llevar mis cuentas en $ y Bs, mis deudas y lo que quiero comprar. Es gratis: ábrela y te pide instalarla con un toque: ${url}`;
   openSheet(`<h2>Invita a un amigo</h2>
     <p style="color:var(--muted)">Así le llega (lo puedes cambiar antes de enviar):</p>
     <div class="bubble" style="margin-top:6px;min-height:0;padding:16px"><p style="font-size:15px">${esc(msg)}</p></div>
@@ -1750,6 +1753,7 @@ const ACT = {
     if (UI.espacio === el.dataset.v) return;
     UI.espacio = el.dataset.v; store.set('koing_espacio', UI.espacio); UI.tab = 'inicio'; UI.stack = [];
     renderApp(UI.espacio === 'negocio' ? 'a-inR' : 'a-inL');
+    contarMontos(appEl);
   },
   ver: (el) => { UI.ver = el.dataset.v; store.set('koing_ver', UI.ver); goTabRefresh(); },
   tasaSheet: () => sheetTasa(),
@@ -1778,6 +1782,10 @@ const ACT = {
     downloadCsv(`koing-ventas-${K.today()}.csv`, rows);
   },
   invitar: () => sheetInvitar(),
+  instalarApp: async () => {
+    if (INST.puedeInstalar()) { const r = await INST.instalar(); if (r === 'accepted') toast('¡Instalada! Búscala en tu pantalla de inicio'); return; }
+    openSheet(`<h2>Instalar en iPhone</h2><ol class="steps"><li><span class="n">1</span><span>Toca <b>Compartir</b> (el cuadrito con la flecha).</span></li><li><span class="n">2</span><span>Elige <b>Agregar a inicio</b>.</span></li><li><span class="n">3</span><span>Toca <b>Agregar</b>.</span></li></ol><div class="actions"><button class="btn ghost" data-act="closeSheet">Entendido</button></div>`, { label: 'Instalar' });
+  },
   compartir: async () => { try { await navigator.share({ title: 'KOING', text: 'Llevo mis cuentas en $ y Bs con KOING. Pruébala:', url: location.origin }); } catch (e) {} },
   copiarLink: async () => { try { await navigator.clipboard.writeText(location.origin); toast('Enlace copiado'); } catch (e) { toast(location.origin, false); } },
   forgot: () => renderForgot(),
@@ -1917,4 +1925,40 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
 }
 
-boot();
+// ---------- Pantalla de inicio animada ----------
+const T0 = performance.now();
+const SPLASH_MIN = 1950; // ms: monedas + sacudida
+function esperar(ms) { return new Promise((ok) => setTimeout(ok, ms)); }
+async function revelar() {
+  const sp = $('#splash');
+  if (!sp) return;
+  const falta = SPLASH_MIN - (performance.now() - T0);
+  if (falta > 0) await esperar(falta);
+  sp.classList.remove('sp-wait');
+  sp.classList.add('sp-out');
+  appEl.firstElementChild?.classList.add('app-reveal');
+  tabEl.firstElementChild?.classList.add('app-reveal');
+  setTimeout(() => { contarMontos(); }, 450);
+  setTimeout(() => { sp.remove(); $$('.app-reveal').forEach((e) => e.classList.remove('app-reveal')); }, 1000);
+}
+// Si cargar tarda más que la animación, las monedas siguen cayendo
+setTimeout(() => { const sp = $('#splash'); if (sp && !sp.classList.contains('sp-out')) sp.classList.add('sp-wait'); }, SPLASH_MIN);
+
+// Los montos grandes cuentan desde 0 (como en el video)
+function contarMontos(root = document) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  $$('[data-count]', root).forEach((el) => {
+    const fin = Number(el.dataset.count) || 0;
+    const f = el.dataset.modo === 'bs' ? fmtBs : fmt;
+    const t0 = performance.now(), dur = 1100;
+    const paso = (now) => {
+      const k = Math.min(1, (now - t0) / dur);
+      const e = 1 - Math.pow(1 - k, 3);
+      el.textContent = f(fin * e);
+      if (k < 1) requestAnimationFrame(paso);
+    };
+    requestAnimationFrame(paso);
+  });
+}
+
+boot().finally(revelar);

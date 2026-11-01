@@ -46,6 +46,16 @@ Sin esas variables la app funciona igual; solo "Olvidé mi clave" responde que n
 4. *Deploy*. Al terminar, abre la URL desde el teléfono.
 
 ### 4. Instalarla en el teléfono
+
+Al abrir el link desde un teléfono, KOING muestra primero una pantalla para instalarla:
+- **Android (Chrome, Edge, Samsung):** botón **Instalar KOING**, un toque y queda como app. Si el navegador no ofrece el botón, se muestran los pasos del menú.
+- **iPhone:** Apple no permite instalar con un botón; se muestran los 3 toques de Safari (Compartir → Agregar a inicio → Agregar).
+- **Si el link se abre dentro de WhatsApp, Instagram o Facebook:** esos navegadores no pueden instalar; en Android aparece **Abrir en Chrome** y en iPhone los pasos para abrir en Safari.
+- Cuando ya está instalada (se abre desde el ícono), esta pantalla no vuelve a salir.
+
+Al abrir la app: el cerdito recibe 3 monedas, se sacude, y la cámara entra por la ranura hacia tu pantalla de inicio; los montos cuentan desde cero.
+
+Instrucciones manuales, por si acaso:
 - **Android (Chrome):** menú ⋮ → *Instalar app* / *Agregar a pantalla principal*.
 - **iPhone (Safari):** botón Compartir → *Agregar a inicio*.
 
@@ -112,6 +122,7 @@ js/app.js                Pantallas y navegación
 js/calc.js               Cálculos: periodos, cuotas, disponible, proyección, alertas
 js/pig.js                El cerdito en SVG + íconos
 js/api.js                Llamadas al servidor con el token
+js/instalar.js           Pantalla para instalar la app (Android, iPhone, WhatsApp)
 api/auth.js              Registro e inicio de sesión
 api/perfil.js            Perfil + carga de todos los datos + borrar cuenta
 api/items.js             Movimientos, deudas, metas, ventas y proveedores (crear, editar, borrar, pagar, abonar, pasar ganancia)
@@ -119,7 +130,7 @@ api/tasa.js              Tasa BCV del día (con caché en Mongo)
 lib/db.js                Conexión a MongoDB (reutilizada entre llamadas)
 lib/auth.js              JWT
 lib/util.js              Limpieza de datos y fechas
-icons/                   Íconos de la app
+icons/                   Íconos de la app y capturas que muestra Android al instalar
 ```
 
 Son **4 funciones serverless** (Vercel Hobby permite hasta 12). El código compartido va en `/lib`, que no cuenta como función.
@@ -150,7 +161,7 @@ Todas las consultas filtran por `userId` del token, así que nadie ve datos de o
 - **Gastos fijos sugeridos:** `js/app.js`, constante `FIJOS_COMUNES`.
 - **Categorías de gasto:** `js/app.js` (vista `formGasto`) **y** `lib/util.js` (`CATEGORIAS`): deben coincidir.
 - **Reglas de las alertas:** `js/calc.js`, función `revisarGasto`.
-- Después de cambiar archivos de la app, sube el número en `sw.js` (`koing-v2` → `koing-v3`) para que los teléfonos tomen la versión nueva.
+- Después de cambiar archivos de la app, sube el número en `sw.js` (`koing-v3` → `koing-v4`) para que los teléfonos tomen la versión nueva.
 
 ---
 
