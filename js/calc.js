@@ -83,7 +83,7 @@ export function cuotasRestantes(d) {
 export function restanteDeuda(d) {
   if (!d.activa) return 0;
   if (d.saldo !== null && d.saldo !== undefined) return d.saldo;
-  return r2(cuotasRestantes(d) * d.cuota);
+  return r2(Math.max(0, cuotasRestantes(d) * d.cuota - (d.abonado || 0)));
 }
 // Fechas futuras de pago de una deuda
 export function calendario(d, max = 60) {
@@ -94,7 +94,8 @@ export function calendario(d, max = 60) {
   let saldo = d.saldo;
   let i = (d.cuotasPagadas || 0) + 1;
   while (n-- > 0) {
-    const monto = saldo !== null && saldo !== undefined ? Math.min(d.cuota, saldo) : d.cuota;
+    const base = i === (d.cuotasPagadas || 0) + 1 ? Math.max(0, d.cuota - (d.abonado || 0)) : d.cuota; // la cuota en curso ya tiene abonos
+    const monto = saldo !== null && saldo !== undefined ? Math.min(base, saldo) : base;
     out.push({ fecha: f, monto: r2(monto), n: i, deuda: d });
     if (saldo !== null && saldo !== undefined) saldo = r2(saldo - monto);
     f = nextDate(f, d.frecuencia); i++;

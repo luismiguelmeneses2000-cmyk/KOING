@@ -17,14 +17,15 @@ module.exports = async (req, res) => {
       // Movimientos de los últimos ~13 meses
       const desde = new Date(); desde.setMonth(desde.getMonth() - 13);
       const desdeStr = desde.toISOString().slice(0, 10);
-      const [user, perfil, deudas, metas, movimientos, ventas, proveedores] = await Promise.all([
+      const [user, perfil, deudas, metas, movimientos, ventas, proveedores, cajas] = await Promise.all([
         db.collection('users').findOne({ _id: toId(userId) }, { projection: { passHash: 0 } }),
         db.collection('perfiles').findOne({ userId }),
         db.collection('deudas').find({ userId }).toArray(),
         db.collection('metas').find({ userId }).sort({ prioridad: 1 }).toArray(),
         db.collection('movimientos').find({ userId, fecha: { $gte: desdeStr } }).sort({ fecha: -1, _id: -1 }).toArray(),
         db.collection('ventas').find({ userId, fecha: { $gte: desdeStr } }).sort({ fecha: -1, hora: -1 }).toArray(),
-        db.collection('proveedores').find({ userId }).sort({ vence: 1 }).toArray()
+        db.collection('proveedores').find({ userId }).sort({ vence: 1 }).toArray(),
+        db.collection('cajas').find({ userId }).sort({ createdAt: -1 }).limit(10).toArray()
       ]);
       if (!user) return res.status(401).json({ error: 'Cuenta no encontrada' });
       return res.json({
@@ -34,7 +35,8 @@ module.exports = async (req, res) => {
         metas: metas.map(pub),
         movimientos: movimientos.map(pub),
         ventas: ventas.map(pub),
-        proveedores: proveedores.map(pub)
+        proveedores: proveedores.map(pub),
+        cajas: cajas.map(pub)
       });
     }
 
@@ -56,7 +58,7 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'DELETE') {
-      await Promise.all(['perfiles', 'deudas', 'metas', 'movimientos', 'ventas', 'proveedores'].map((c) => db.collection(c).deleteMany({ userId })));
+      await Promise.all(['perfiles', 'deudas', 'metas', 'movimientos', 'ventas', 'proveedores', 'cajas'].map((c) => db.collection(c).deleteMany({ userId })));
       await db.collection('users').deleteOne({ _id: toId(userId) });
       return res.json({ ok: true });
     }

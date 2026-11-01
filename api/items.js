@@ -6,9 +6,9 @@
 //   DELETE /api/items?col=...&id=...             borra (y revierte efectos de pagos/ahorros)
 const { getDb, toId } = require('../lib/db');
 const { requireUser } = require('../lib/auth');
-const { cleanDeuda, cleanMovimiento, cleanMeta, cleanVenta, cleanProveedor, num, int, oneOf, date, nextDate, tasaNum, str } = require('../lib/util');
+const { cleanDeuda, cleanMovimiento, cleanMeta, cleanVenta, cleanProveedor, cleanCaja, generarCaja, num, int, oneOf, date, nextDate, tasaNum, str } = require('../lib/util');
 
-const CLEAN = { movimientos: cleanMovimiento, deudas: cleanDeuda, metas: cleanMeta, ventas: cleanVenta, proveedores: cleanProveedor };
+const CLEAN = { movimientos: cleanMovimiento, deudas: cleanDeuda, metas: cleanMeta, ventas: cleanVenta, proveedores: cleanProveedor, cajas: cleanCaja };
 const pub = (doc) => { if (!doc) return doc; const { _id, userId, ...rest } = doc; return { id: String(_id), ...rest }; };
 
 const r2 = (n) => Math.round(n * 100) / 100;
@@ -40,20 +40,30 @@ module.exports = async (req, res) => {
       const tasa = tasaNum(b.tasa);
       const montoOrig = num(b.monto, 0) || (moneda === 'VES' && tasa ? r2(deuda.cuota * tasa) : deuda.cuota);
       const monto = convertir(montoOrig, moneda, 'USD', tasa); // en $
-      const prev = { proximoPago: deuda.proximoPago, cuotasPagadas: deuda.cuotasPagadas, saldo: deuda.saldo, activa: deuda.activa };
+      const prev = { proximoPago: deuda.proximoPago, cuotasPagadas: deuda.cuotasPagadas, saldo: deuda.saldo, activa: deuda.activa, abonado: deuda.abonado || 0 };
+      // Pago parcial: se acumula como abono hasta completar la cuota.
+      // Si alcanza para una o más cuotas, se avanzan y lo que sobra queda abonado a la siguiente.
+      const total = r2((deuda.abonado || 0) + monto);
+      let k = deuda.cuota > 0 ? Math.floor((total + 0.009) / deuda.cuota) : 1;
+      if (deuda.tipo === 'tarjeta') k = Math.min(k, 1);
+      if (deuda.cuotasTotal) k = Math.min(k, Math.max(0, deuda.cuotasTotal - (deuda.cuotasPagadas || 0)));
+      let proximo = deuda.proximoPago;
+      for (let i = 0; i < k; i++) proximo = nextDate(proximo, deuda.frecuencia);
       const upd = {
-        cuotasPagadas: (deuda.cuotasPagadas || 0) + 1,
-        proximoPago: nextDate(deuda.proximoPago, deuda.frecuencia),
+        cuotasPagadas: (deuda.cuotasPagadas || 0) + k,
+        proximoPago: proximo,
+        abonado: deuda.tipo === 'tarjeta' && k ? 0 : Math.max(0, r2(total - k * deuda.cuota)),
         saldo: deuda.saldo === null || deuda.saldo === undefined ? null : Math.max(0, r2(deuda.saldo - monto))
       };
       upd.activa = !((deuda.cuotasTotal && upd.cuotasPagadas >= deuda.cuotasTotal) || (upd.saldo !== null && upd.saldo <= 0));
+      if (!upd.activa) upd.abonado = 0;
       await C.updateOne({ _id: id }, { $set: upd });
       const mov = {
         ...cleanMovimiento({ tipo: 'pago', monto: montoOrig, moneda, tasa, descripcion: deuda.nombre, categoria: 'Otros', metodo: b.metodo, fecha: b.fecha, deudaId: String(id) }),
         prev, userId, createdAt: new Date()
       };
       const r = await db.collection('movimientos').insertOne(mov);
-      return res.status(201).json({ deuda: pub({ ...deuda, ...upd }), movimiento: pub({ ...mov, _id: r.insertedId }) });
+      return res.status(201).json({ deuda: pub({ ...deuda, ...upd }), movimiento: pub({ ...mov, _id: r.insertedId }), cuotasCubiertas: k, parcial: k === 0 });
     }
 
     // ---------- Pagar (o abonar) a un proveedor ----------
@@ -91,6 +101,20 @@ module.exports = async (req, res) => {
       return res.status(201).json({ salida: pub({ ...salida, _id: r1.insertedId, vinculoId: String(r2b.insertedId) }), entrada: pub({ ...entrada, _id: r2b.insertedId }) });
     }
 
+    // ---------- Caja de ahorro: tachar / destachar una casilla ----------
+    if (req.method === 'POST' && col === 'cajas' && action === 'tachar') {
+      const caja = id && await C.findOne({ _id: id, userId });
+      if (!caja) return res.status(404).json({ error: 'Caja no encontrada' });
+      const i = int(b.i, -1);
+      if (i < 0 || i >= caja.numeros.length) return res.status(400).json({ error: 'Casilla no válida' });
+      const set = new Set(caja.tachados || []);
+      if (b.valor === false) set.delete(i); else set.add(i);
+      const tachados = [...set].sort((a, c) => a - c);
+      const completada = tachados.length === caja.numeros.length;
+      await C.updateOne({ _id: id }, { $set: { tachados, completada, updatedAt: new Date() } });
+      return res.json({ item: pub({ ...caja, tachados, completada }) });
+    }
+
     // ---------- Reordenar metas ----------
     if (req.method === 'POST' && col === 'metas' && action === 'reordenar') {
       const ids = Array.isArray(b.ids) ? b.ids.slice(0, 100) : [];
@@ -101,6 +125,7 @@ module.exports = async (req, res) => {
     // ---------- Crear ----------
     if (req.method === 'POST') {
       const doc = { ...CLEAN[col](b), userId, createdAt: new Date() };
+      if (col === 'cajas') { doc.numeros = generarCaja(doc.meta); doc.tachados = []; doc.completada = false; }
       let deuda = null, meta = null;
 
       if (col === 'movimientos' && doc.tipo === 'gasto' && doc.metodo === 'credito' && b.credito) {

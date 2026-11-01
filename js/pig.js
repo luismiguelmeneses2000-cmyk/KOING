@@ -1,5 +1,5 @@
 // El cerdito de KOING, dibujado en SVG para poder animar sus partes
-export function pig({ size = 200, coin = 'idle', label = 'Cerdito de KOING', cls = '' } = {}) {
+export function pig({ size = 200, coin = 'idle', label = 'Cerdito de KOING', cls = '', feliz = false } = {}) {
   const h = Math.round(size * (coin === 'drop' ? 1.25 : 0.9));
   const vb = coin === 'drop' ? '0 -70 200 250' : '0 0 200 180';
   const coinEl = coin === 'none' ? ''
@@ -16,7 +16,9 @@ export function pig({ size = 200, coin = 'idle', label = 'Cerdito de KOING', cls
     <ellipse cx="100" cy="100" rx="62" ry="47" fill="var(--pig-fill)" stroke="var(--pig-line)" stroke-width="7"/>
     <path d="M66 112 Q100 146 150 116 L150 130 Q100 150 66 124 Z" fill="var(--pig-shade)" opacity=".55"/>
     <path d="M82 70 Q100 63 118 70" fill="none" stroke="var(--pig-line)" stroke-width="7" stroke-linecap="round"/>
-    <ellipse class="eye" cx="140" cy="90" rx="6" ry="6" fill="var(--pig-line)"/>
+    ${feliz
+      ? '<path d="M133 92 Q140 82 147 92" fill="none" stroke="var(--pig-line)" stroke-width="5" stroke-linecap="round"/><ellipse cx="128" cy="106" rx="7" ry="4" fill="#E9A99A" opacity=".75"/>'
+      : '<ellipse class="eye" cx="140" cy="90" rx="6" ry="6" fill="var(--pig-line)"/>'}
   </g>
 </svg>`;
 }
@@ -44,6 +46,9 @@ const P = {
   chart: '<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',
   swap: '<path d="M7 7h13l-4-4M17 17H4l4 4"/>',
   share: '<path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 3v13M7 8l5-5 5 5"/>',
+  wallet: '<path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2z"/><circle cx="16" cy="14.5" r="1.3"/>',
+  calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  box: '<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12h18M9 4h6l2 4H7z"/><path d="M10 16h4"/>',
   copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>'
 };
 export const icon = (name, size = 24, sw = 2) =>
